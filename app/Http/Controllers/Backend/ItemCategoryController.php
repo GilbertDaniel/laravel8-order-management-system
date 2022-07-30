@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\backend\ItemCategoryRequest;
 use App\Models\ItemCategory;
 use Illuminate\Http\Request;
 
@@ -16,9 +17,6 @@ class ItemCategoryController extends Controller
     public function index()
     {
         $categories = ItemCategory::paginate();
-
-
-
         return view('backend.item_category.index', compact('categories'));
     }
 
@@ -29,7 +27,7 @@ class ItemCategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view('backend.item_category.create');
     }
 
     /**
@@ -38,9 +36,13 @@ class ItemCategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ItemCategoryRequest $request)
     {
-        //
+        ItemCategory::create([
+            'name' => $request->name
+        ]);
+
+        return redirect()->route('categories.create')->with('message', 'Data Saved Successfully');
     }
 
     /**
@@ -62,7 +64,8 @@ class ItemCategoryController extends Controller
      */
     public function edit($id)
     {
-        //
+        $category = ItemCategory::find($id);
+        return view('backend.item_category.edit', compact('category'));
     }
 
     /**
@@ -72,9 +75,13 @@ class ItemCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ItemCategoryRequest $request, $id)
     {
-        //
+        $category = ItemCategory::find($id);
+        $category->update([
+            'name' => $request->name,
+        ]);
+        return redirect()->route('categories')->with('message', 'Data updated successfully.');
     }
 
     /**
@@ -85,6 +92,9 @@ class ItemCategoryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $category = ItemCategory::find($id);
+        $category->delete();
+
+        return redirect()->route('categories')->with('message', 'Data deleted successfully.');
     }
 }

@@ -60,6 +60,23 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('categories')->group(function () {
         Route::get('/', [ItemCategoryController::class, 'index'])
         ->name('categories');
+
+        Route::get('/create', [ItemCategoryController::class, 'create'])
+        ->name('categories.create');
+
+
+        Route::post('/store', [ItemCategoryController::class, 'store'])
+        ->name('categories.store');
+
+        Route::get('edit/{id}', [ItemCategoryController::class, 'edit'])
+        ->name('categories.edit');
+
+        Route::put('update/{id}', [ItemCategoryController::class, 'update'])
+        ->name('categories.update');
+
+        Route::delete('delete/{id}', [ItemCategoryController::class, 'destroy'])
+        ->name('categories.destroy');
+
     });
 
     // order management routes
