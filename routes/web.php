@@ -3,6 +3,7 @@
 use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Backend\ItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,9 +52,23 @@ Route::middleware(['auth'])->group(function () {
 
     // item management routes
     Route::prefix('items')->group(function () {
-        Route::get('/', function () {
-            return view('backend.item.index');
-        })->name('item');
+        Route::get('/', [ItemController::class, 'index'])
+        ->name('items');
+
+        Route::get('/create', [ItemController::class, 'create'])
+        ->name('items.create');
+
+        Route::post('/store', [ItemController::class, 'store'])
+        ->name('items.store');
+
+        Route::get('edit/{id}', [ItemController::class, 'edit'])
+        ->name('items.edit');
+
+        Route::put('update/{id}', [ItemController::class, 'update'])
+        ->name('items.update');
+
+        Route::delete('delete/{id}', [ItemController::class, 'destroy'])
+        ->name('items.destroy');
     });
 
     // category management routes
