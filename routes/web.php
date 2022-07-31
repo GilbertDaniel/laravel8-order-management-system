@@ -16,7 +16,6 @@ use App\Http\Controllers\Backend\OrderController;
 | contains the "web" middleware group. Now create something great!
 |
  */
-
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/', function () {
@@ -24,7 +23,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // user management routes
-    Route::prefix('manageuser')->group(function () {
+    Route::prefix('manageuser')->middleware(['role:admin'])->group(function () {
         Route::get('/account', function () {
             return view('backend.account.index');
         })->name('account');
@@ -52,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // item management routes
-    Route::prefix('items')->group(function () {
+    Route::prefix('items')->middleware(['role:admin'])->group(function () {
         Route::get('/', [ItemController::class, 'index'])
         ->name('items');
 
@@ -73,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // category management routes
-    Route::prefix('categories')->group(function () {
+    Route::prefix('categories')->middleware(['role:admin'])->group(function () {
         Route::get('/', [ItemCategoryController::class, 'index'])
         ->name('categories');
 

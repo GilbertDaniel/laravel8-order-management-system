@@ -96,7 +96,7 @@
 
                                 </div>
                                 <div class="mt-4">
-                                    {{-- {{ $tasks->links() }} --}}
+                                    {{ $orders->links() }}
                                 </div>
                             </div>
                         </div>
