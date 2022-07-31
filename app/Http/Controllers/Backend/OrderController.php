@@ -4,10 +4,26 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
+use App\Models\Order;
+use App\Models\OrderDetail;
+use App\Utils\OrderUtil;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    protected $orderUtil;
+    /**
+     * Constructor
+     *
+     * @param OrderUtils $order
+     * @return void
+     */
+
+    public function __construct(OrderUtil $orderUtil)
+    {
+        $this->orderUtil = $orderUtil;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,7 +31,9 @@ class OrderController extends Controller
      */
     public function index()
     {
-        return view('backend.order.index');
+        $orders = Order::paginate();
+
+        return view('backend.order.index', compact('orders'));
     }
 
     /**
@@ -25,8 +43,8 @@ class OrderController extends Controller
      */
     public function create()
     {
-        $products = Item::select('id','name','price')
-        ->get();
+        $products = Item::select('id', 'name', 'price')
+            ->get();
         return view('backend.order.create', compact('products'));
     }
 
@@ -38,7 +56,36 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        return($request);
+        DB::beginTransaction();
+
+        // creating order
+        $order = Order::create([
+            'final_total' => $request->final_total,
+        ]);
+
+        if ($order) {
+            $order_no = $this->orderUtil->generateOrderNo($order->id);
+            $order->order_no = $order_no;
+            $order->save();
+
+            $total_items = count($request->product_id);
+            for ($i = 0; $i < $total_items; $i++) {
+                // creating order lines
+                $order_detail = OrderDetail::create([
+                    'order_id' => $order->id,
+                    'product_id' => $request->product_id[$i],
+                    'price' => $request->price[$i],
+                    'quantity' => $request->quantity[$i],
+                    'sub_total' => $request->sub_total[$i],
+
+                ]);
+            }
+
+        }
+
+        DB::commit();
+
+        return redirect()->route('orders')->with('message', 'Data Saved Successfully');
     }
 
     /**
@@ -60,7 +107,11 @@ class OrderController extends Controller
      */
     public function edit($id)
     {
-        //
+        $order = Order::find($id);
+        $products = Item::select('id', 'name', 'price')
+            ->get();
+
+        return view('backend.order.edit', compact('order', 'products'));
     }
 
     /**
@@ -72,7 +123,8 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+
     }
 
     /**
@@ -83,6 +135,20 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {
-        //
+
+        DB::beginTransaction();
+
+        $order = Order::where('id', $id)
+            ->with(['order_details'])
+            ->first();
+
+        $deleted_order_line = $order->order_details;
+        $deleted_order_line_ids = $deleted_order_line->pluck('id')->toArray();
+        $order->delete();
+        OrderDetail::whereIn('id', $deleted_order_line_ids)->delete();
+
+        DB::commit();
+
+        return redirect()->route('orders')->with('message', 'Data deleted successfully.');
     }
 }
