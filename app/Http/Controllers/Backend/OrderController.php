@@ -124,7 +124,32 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
 
+        $total_items = $request->product_id;
 
+        DB::beginTransaction();
+
+        $order = Order::find($id);
+        $order->update([
+            'final_total' => $request->final_total
+        ]);
+
+        for ($i=0; $i < count($total_items); $i++) {
+
+            $update_data = [
+                'product_id'=> $request->product_id[$i],
+                'price'=> $request->price[$i],
+                'quantity' => $request->quantity[$i],
+                'sub_total'=> $request->sub_total[$i],
+            ];
+            # code...
+            DB::table('order_details')
+              ->where('order_id', $id)
+              ->update($update_data);
+        }
+
+        DB::commit();
+
+        return redirect()->route('orders')->with('message', 'Data Saved Successfully');
     }
 
     /**
