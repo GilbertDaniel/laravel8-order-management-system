@@ -4,6 +4,7 @@ use App\Http\Controllers\Backend\ItemCategoryController;
 use App\Http\Controllers\Backend\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\ItemController;
+use App\Http\Controllers\Backend\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,9 +97,15 @@ Route::middleware(['auth'])->group(function () {
 
     // order management routes
     Route::prefix('orders')->group(function () {
-        Route::get('/', function () {
-            return view('backend.order.index');
-        })->name('order');
+
+        Route::get('/', [OrderController::class, 'index'])
+        ->name('orders');
+
+        Route::get('/create', [OrderController::class, 'create'])
+        ->name('orders.create');
+
+        Route::post('/store', [OrderController::class, 'store'])
+        ->name('orders.store');
     });
 });
 
